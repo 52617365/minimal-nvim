@@ -6,9 +6,8 @@ vim.cmd("set nowrap")
 vim.opt.ignorecase = true
 vim.opt.hlsearch = false
 vim.opt.tabstop = 2
--- vim.opt.shiftwidth = 2
+vim.opt.shiftwidth = 2
 vim.opt.expandtab = true
--- im.bo.softtabstop = 2
 -- vim.opt.showmatch = false
 vim.opt.number = true
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -48,7 +47,6 @@ M.config = function()
 			{ name = "nvim_lsp" },
 			{ name = "nvim_lua" },
 			{ name = "buffer" },
-			{ name = "path" },
 		}),
 	})
 end
@@ -59,14 +57,16 @@ plugins = {
   {"nvim-treesitter/nvim-treesitter", build = ":TSUpdate"},
   {"Shatur/neovim-ayu"},
   {"numToStr/Comment.nvim"},
-  {"williamboman/mason.nvim", build = ":MasonUpdate"},
-  {"williamboman/mason-lspconfig.nvim"},
   {"neovim/nvim-lspconfig"},
+  {'phaazon/hop.nvim'},
+  {'tpope/vim-fugitive'},
   M,
 }
 
 require("lazy").setup(plugins)
 require('telescope').load_extension('fzf')
+
+vim.wo.signcolumn = "yes" -- Avoids the weird little movement with rust lsp
 
 local builtin = require('telescope.builtin')
 
@@ -79,12 +79,24 @@ vim.keymap.set('n', '<leader>g', builtin.live_grep, {})
 -- vim.cmd("colorscheme catppuccin-macchiato")
 vim.cmd("colorscheme ayu-mirage")
 require('Comment').setup()
-require("mason").setup()
-require("mason-lspconfig").setup {
-    ensure_installed = { "lua_ls", "rust_analyzer" },
-}
+
+local on_attach = function(client)
+    require'completion'.on_attach(client)
+end
+
+require("lspconfig").gopls.setup {}
 require("lspconfig").lua_ls.setup {}
-require("lspconfig").rust_analyzer.setup {}
+require("lspconfig").rust_analyzer.setup({
+        on_attach = on_attach,
+        settings = {
+         ["rust-analyzer"] = {
+                -- enable clippy on save
+                -- checkOnSave = {
+                --   command = "clippy",
+                -- },
+              },
+        },
+})
 
 vim.api.nvim_create_autocmd('LspAttach', {
     group = vim.api.nvim_create_augroup('UserLspConfig', {}),
@@ -95,7 +107,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
       vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
       vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
       vim.keymap.set('n', '<leader>r', vim.lsp.buf.rename, opts)
-      vim.keymap.set('n', '<leader>u', vim.lsp.buf.references, opts)
+      vim.keymap.set('n', '<leader>u', builtin.lsp_references, opts)
    end,
 })
 
