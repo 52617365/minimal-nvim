@@ -77,6 +77,11 @@ vim.keymap.set('n', '<leader>f', builtin.find_files, {})
 vim.keymap.set('n', '<leader>g', builtin.live_grep, {})
 
 -- vim.cmd("colorscheme catppuccin-macchiato")
+require('ayu').setup({
+    overrides = {
+	    LineNr = {fg = "#000000"},
+    },
+})
 vim.cmd("colorscheme ayu-mirage")
 require('Comment').setup()
 
@@ -84,7 +89,7 @@ local on_attach = function(client)
     require'completion'.on_attach(client)
 end
 
-require("lspconfig").gopls.setup {}
+-- require("lspconfig").gopls.setup {}
 require("lspconfig").lua_ls.setup {}
 require("lspconfig").rust_analyzer.setup({
         on_attach = on_attach,
