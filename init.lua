@@ -2,13 +2,13 @@ local vim = vim
 
 vim.g.mapleader = ";"
 vim.cmd("set clipboard=unnamedplus")
+vim.cmd("let g:tmux_navigator_save_on_switch = 2")
 vim.cmd("set nowrap")
 vim.opt.ignorecase = true
 vim.opt.hlsearch = false
 vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
 vim.opt.expandtab = true
--- vim.opt.showmatch = false
 vim.opt.number = true
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -16,8 +16,7 @@ if not vim.loop.fs_stat(lazypath) then
     "git",
     "clone",
     "--filter=blob:none",
-    "https://github.com/folke/lazy.nvim.git",
-    "--branch=stable", -- latest stable release
+    "https://github.com/folke/lazy.nvim.git", "--branch=stable", -- latest stable release
     lazypath,
   })
 end
@@ -52,7 +51,7 @@ M.config = function()
 end
 
 plugins = {
-  {'nvim-telescope/telescope.nvim', tag = '0.1.1', dependencies = { 'nvim-lua/plenary.nvim' }},
+  {'nvim-telescope/telescope.nvim', tag = '0.1.4', dependencies = { 'nvim-lua/plenary.nvim' }},
   {'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },
   {"nvim-treesitter/nvim-treesitter", build = ":TSUpdate"},
   {"Shatur/neovim-ayu"},
@@ -60,6 +59,9 @@ plugins = {
   {"neovim/nvim-lspconfig"},
   {'phaazon/hop.nvim'},
   {'tpope/vim-fugitive'},
+  {'christoomey/vim-tmux-navigator'},
+  {'rebelot/kanagawa.nvim'},
+  { 'dasupradyumna/midnight.nvim', lazy = false, priority = 1000 },
   M,
 }
 
@@ -76,29 +78,20 @@ vim.keymap.set('n', '<leader><leader>', "<C-W>w<CR>")
 vim.keymap.set('n', '<leader>f', builtin.find_files, {})
 vim.keymap.set('n', '<leader>g', builtin.live_grep, {})
 
--- vim.cmd("colorscheme catppuccin-macchiato")
-require('ayu').setup({
-    overrides = {
-	    LineNr = {fg = "#000000"},
-    },
-})
-vim.cmd("colorscheme ayu-mirage")
+vim.cmd.colorscheme 'midnight'
 require('Comment').setup()
 
 local on_attach = function(client)
     require'completion'.on_attach(client)
 end
 
--- require("lspconfig").gopls.setup {}
 require("lspconfig").lua_ls.setup {}
+require("lspconfig").pyright.setup {}
+require("lspconfig").gopls.setup {}
 require("lspconfig").rust_analyzer.setup({
         on_attach = on_attach,
         settings = {
          ["rust-analyzer"] = {
-                -- enable clippy on save
-                -- checkOnSave = {
-                --   command = "clippy",
-                -- },
               },
         },
 })
@@ -113,6 +106,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
       vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
       vim.keymap.set('n', '<leader>r', vim.lsp.buf.rename, opts)
       vim.keymap.set('n', '<leader>u', builtin.lsp_references, opts)
+      vim.keymap.set({ 'n', 'v' }, '<leader>c', vim.lsp.buf.code_action, opts)
    end,
 })
 
