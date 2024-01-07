@@ -2,7 +2,6 @@ local vim = vim
 
 vim.g.mapleader = ";"
 vim.cmd("set clipboard=unnamedplus")
-vim.cmd("let g:tmux_navigator_save_on_switch = 2")
 vim.cmd("set nowrap")
 vim.opt.ignorecase = true
 vim.opt.hlsearch = false
@@ -59,14 +58,16 @@ plugins = {
   {"neovim/nvim-lspconfig"},
   {'phaazon/hop.nvim'},
   {'tpope/vim-fugitive'},
-  {'christoomey/vim-tmux-navigator'},
   {'rebelot/kanagawa.nvim'},
-  { 'dasupradyumna/midnight.nvim', lazy = false, priority = 1000 },
+  {'dasupradyumna/midnight.nvim', lazy = false, priority = 1000},
+  {'github/copilot.vim'},
+  {'kylechui/nvim-surround', version = "*"},
   M,
 }
 
 require("lazy").setup(plugins)
 require('telescope').load_extension('fzf')
+require('nvim-surround').setup({})
 
 vim.wo.signcolumn = "yes" -- Avoids the weird little movement with rust lsp
 
@@ -77,6 +78,9 @@ vim.keymap.set('n', '<leader><leader>', "<C-W>w<CR>")
 
 vim.keymap.set('n', '<leader>f', builtin.find_files, {})
 vim.keymap.set('n', '<leader>g', builtin.live_grep, {})
+vim.keymap.set('n', '<leader>d', builtin.diagnostics, {})
+
+
 
 vim.cmd.colorscheme 'midnight'
 require('Comment').setup()
@@ -88,6 +92,7 @@ end
 require("lspconfig").lua_ls.setup {}
 require("lspconfig").pyright.setup {}
 require("lspconfig").gopls.setup {}
+require("lspconfig").zls.setup {}
 require("lspconfig").rust_analyzer.setup({
         on_attach = on_attach,
         settings = {
